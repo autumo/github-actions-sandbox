@@ -32,4 +32,8 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - name: Run AWS CLI
         run: |
-          aws s3 ls
+          for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
+            echo "$file was changed"
+            aws s3 ls
+          done
+
