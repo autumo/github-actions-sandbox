@@ -33,6 +33,5 @@ jobs:
       - name: Run AWS CLI
         run: |
           for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
-            echo "$file was changed"
-            aws s3 ls
+            aws lambda invoke --function-name sql-executor --payload '{ "filePath": "$file" }'
           done
