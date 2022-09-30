@@ -18,22 +18,14 @@ jobs:
         uses: tj-actions/changed-files@v29
         with:
           files: |
-            sql/**
-      - name: List all changed files
-        id: changed-files
-        run: |
-          for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
-            echo "$file was changed"
-          done
+            manualsql/**
       - name: Configure AWS credentials from IAM Role
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      - name: Run AWS CLI
+      - name: Invoke lambda
         run: |
           for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
-            echo "$file was changed"
-            aws s3 ls
+            aws lambda invoke --function-name sql-executor --payload '{ "filePath": "$file" }'
           done
-
