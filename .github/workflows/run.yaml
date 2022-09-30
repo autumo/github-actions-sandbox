@@ -19,13 +19,21 @@ jobs:
         with:
           files: |
             manualsql/**
+      - name: List all changed files
+        id: changed-files
+        run: |
+          for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
       - name: Configure AWS credentials from IAM Role
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      - name: Invoke lambda
+      - name: Run AWS CLI
         run: |
           for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
-            aws lambda invoke --function-name sql-executor --payload '{ "filePath": "$file" }'
+            echo "$file was changed"
+            aws s3 ls
           done
+
