@@ -10,8 +10,8 @@ jobs:
           fetch-depth: 2
       -
         name: Test
-        run: echo "branch::`${GITHUB_REF_NAME//\//_}`" >> $BRANCH_NAME
+        run: echo "branch=`echo ${GITHUB_REF_NAME//\//_}`" >> $GITHUB_OUTPUT
         id: get_branch_name
       -
         name: Output Test
-        run: echo $BRANCH_NAME
+        run: echo ${{ steps.get_branch_name.outputs.branch }}
