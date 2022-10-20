@@ -10,4 +10,4 @@ jobs:
           fetch-depth: 2
       -
         name: Test
-        run: echo ${ GITHUB_REF_NAME//\//_ }
+        run: echo ${GITHUB_REF_NAME//\//_}
