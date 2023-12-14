@@ -1,21 +1,25 @@
 name: GitHub Actions Demo
 on: [push]
-env:
-  AWS_ROLE_ARN: arn:aws:iam::054197611072:role/test-github-actions
-  AWS_REGION: ap-northeast-1 
 jobs:
   diff:
     runs-on: ubuntu-latest
+    strategy:  
+      matrix:  
+        directory:  
+          - manualsql  
+          - sql  
     permissions:
       id-token: write
       contents: read
+    outputs:  
+      matrix: ${{ steps.set-matrix.outputs.matrix }}  
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
       - name: Get specific changed files
         id: changed-files-specific
-        uses: tj-actions/changed-files@v29
+        uses: tj-actions/changed-files@v40.2.2
         with:
           files: |
             manualsql/**
@@ -25,13 +29,19 @@ jobs:
           for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
             echo "$file was changed"
           done
-      - name: Configure AWS credentials from IAM Role
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
       - name: Run AWS CLI
         run: |
           for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
-            aws lambda invoke --function-name sql-executor --payload '{ "filePath": "$file" }'
+            echo '{ "filePath": "$file" }'
           done
+      - name: Determine changed directories  
+        id: set-matrix  
+        run: |  
+          echo "::set-output name=matrix::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | \
+          grep -E '^(Alice|Bob)/' | awk -F/ '{print $1}' | sort -u | jq -R -s -c 'split("\n")[:-1]')"  
+      - name: Terraform Init and Plan  
+        run: |
+          echo ${{ steps.set-matrix.outputs.matrix }}
+          echo ${{ matrix.directory }}
+          echo ${{github.event.before}}
+          echo ${{github.event.after}}
