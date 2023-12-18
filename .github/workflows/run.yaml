@@ -34,5 +34,5 @@ jobs:
 
       - name: access repository variables
         run: |
-          echo "${vars.HOGE}"
+          echo "${{vars.HOGE}}"
         working-directory: ${{ matrix.directory }}
