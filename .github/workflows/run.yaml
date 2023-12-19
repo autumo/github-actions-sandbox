@@ -3,40 +3,7 @@ on: [push]
 jobs:
   diff:
     runs-on: ubuntu-latest
-    strategy:  
-      matrix:  
-        directory:  
-          - manualsql  
-          - sql
     steps:
-      - uses: actions/checkout@v4.1.1
-        with:
-          fetch-depth: 2
-      - name: Get specific changed files
-        id: changed-files-specific
-        uses: tj-actions/changed-files@v40.2.2
-        with:
-          files: |
-            ${{ matrix.directory }}/**
-      - name: Condition
-        if: steps.changed-files-specific.outputs.any_changed == 'false'
-        run: |
-          echo "No changed"
-          exit 0
-
-      - name: terraform plan
-        id: changed-files
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
-        run: |
-          echo "terraform plan"
-          ls -la
-        working-directory: ${{ matrix.directory }}
-
-      - name: access repository variables
-        run: |
-          echo "${{vars.HOGE}}"
-        working-directory: ${{ matrix.directory }}
-
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@v1.0.0
         with:
