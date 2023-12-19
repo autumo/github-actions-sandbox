@@ -36,3 +36,16 @@ jobs:
         run: |
           echo "${{vars.HOGE}}"
         working-directory: ${{ matrix.directory }}
+
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            whoami
+            ls -la
+
