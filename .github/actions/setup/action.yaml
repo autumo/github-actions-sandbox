@@ -1,0 +1,24 @@
+NAME: Setup
+inputs:
+  changes_in_sql:
+    description: Files with changes in the sql directory
+    required: false
+  changes_in_root:
+    description: Files with changes in the root directory
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Skip job if no changes detected
+      id: check_skip_job
+      if: |
+        (inputs.directory == 'sql' && inputs.changes_in_sql == '') &&
+        inputs.changes_in_root == ''
+      shell: bash
+      run: |
+        echo "No changes in ${{ inputs.directory }} directory"
+        echo "SKIP=true" >> "$GITHUB_OUTPUT"
+outputs:
+  skip:
+    description: Output flag for skipping the remaining steps in the workflow if no changes were detected in the target directory.
+    value: ${{ steps.check_skip_job.outputs.skip }}
