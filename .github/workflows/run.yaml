@@ -30,7 +30,7 @@ jobs:
             DIFF_CMD="git diff --name-only HEAD^ HEAD"
           fi
           CHANGES_IN_sql=$($DIFF_CMD -- 'sql/' | head -n 1)
-          CHANGES_IN_ROOT=$($DIFF_CMD -- '.github/run.yaml' '.github/actions/setup/action.yaml' 'fuga.sql' | head -n 1)
+          CHANGES_IN_ROOT=$($DIFF_CMD -- '.github/workflows/run.yaml' '.github/actions/setup/action.yaml' 'fuga.sql' | head -n 1)
           echo "changes_in_sql=$CHANGES_IN_sql" >> "$GITHUB_OUTPUT"
           echo "changes_in_root=$CHANGES_IN_ROOT" >> "$GITHUB_OUTPUT"
 
