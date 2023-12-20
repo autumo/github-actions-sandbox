@@ -3,10 +3,10 @@ name: Sandbox Actions
 on:
   pull_request:
     branches:
-      - master
+      - main
   push:
     branches:
-      - master
+      - main
 
 jobs:
   check_for_changes:
@@ -23,9 +23,9 @@ jobs:
       - name: Detect changes
         id: filter_changes
         run: |
-          git fetch origin master
+          git fetch origin main
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            DIFF_CMD="git diff --name-only origin/master...HEAD"
+            DIFF_CMD="git diff --name-only origin/main...HEAD"
           elif [[ "${{ github.event_name }}" == "push" ]]; then
             DIFF_CMD="git diff --name-only HEAD^ HEAD"
           fi
@@ -53,7 +53,7 @@ jobs:
         run: echo "SQL Plan"
 
   apply:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     needs:
       - check_for_changes
       - plan
