@@ -48,7 +48,7 @@ jobs:
           changes_in_sql: ${{ needs.check_for_changes.outputs.changes_in_sql }}
           changes_in_root: ${{ needs.check_for_changes.outputs.changes_in_root }}
 
-      - name: Plamn
+      - name: Plan
         if: steps.setup.outputs.skip != 'true'
         run: echo "SQL Plan"
 
