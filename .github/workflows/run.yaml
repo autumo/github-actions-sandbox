@@ -1,37 +1,76 @@
-name: GitHub Actions Demo
-on: [push]
-env:
-  AWS_ROLE_ARN: arn:aws:iam::054197611072:role/test-github-actions
-  AWS_REGION: ap-northeast-1 
+name: Sandbox Actions
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
 jobs:
-  diff:
+  check_for_changes:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
+    outputs:
+      changes_in_sql: ${{ steps.filter_changes.outputs.changes_in_sql }}
+      changes_in_root: ${{ steps.filter_changes.outputs.changes_in_root }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 2
-      - name: Get specific changed files
-        id: changed-files-specific
-        uses: tj-actions/changed-files@v29
-        with:
-          files: |
-            manualsql/**
-      - name: List all changed files
-        id: changed-files
+          fetch-depth: 0
+
+      - name: Detect changes
+        id: filter_changes
         run: |
-          for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
-            echo "$file was changed"
-          done
-      - name: Configure AWS credentials from IAM Role
-        uses: aws-actions/configure-aws-credentials@v1
+          git fetch origin main
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            DIFF_CMD="git diff --name-only origin/main...HEAD"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            DIFF_CMD="git diff --name-only HEAD^ HEAD"
+          fi
+          CHANGES_IN_sql=$($DIFF_CMD -- 'sql/' | head -n 1)
+          CHANGES_IN_ROOT=$($DIFF_CMD -- '.github/workflows/run.yaml' '.github/actions/setup/action.yaml' 'fuga.sql' | head -n 1)
+          echo "changes_in_sql=$CHANGES_IN_sql" >> "$GITHUB_OUTPUT"
+          echo "changes_in_root=$CHANGES_IN_ROOT" >> "$GITHUB_OUTPUT"
+
+  plan:
+    needs: check_for_changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Setup
+        id: setup
+        uses: ./.github/actions/setup
         with:
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-      - name: Run AWS CLI
-        run: |
-          for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
-            aws lambda invoke --function-name sql-executor --payload '{ "filePath": "$file" }'
-          done
+          changes_in_sql: ${{ needs.check_for_changes.outputs.changes_in_sql }}
+          changes_in_root: ${{ needs.check_for_changes.outputs.changes_in_root }}
+
+      - name: Plan
+        if: steps.setup.outputs.skip != 'true'
+        run: echo "SQL Plan"
+
+  apply:
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - check_for_changes
+      - plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Setup
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          changes_in_sql: ${{ needs.check_for_changes.outputs.changes_in_sql }}
+          changes_in_root: ${{ needs.check_for_changes.outputs.changes_in_root }}
+
+      - name: Run
+        if: steps.setup.outputs.skip != 'true'
+        run: echo "Run SQL"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
