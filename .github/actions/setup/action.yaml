@@ -1,5 +1,7 @@
 NAME: Setup
 inputs:
+  directory:
+    required: false
   sql-cache-hit:
     description: Files with changes in the sql directory
     required: false
