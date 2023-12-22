@@ -24,7 +24,7 @@ jobs:
         id: cache-sql
         uses: actions/cache@v3.3.2
         with:
-          path: ~/sql
+          path: sql/
           key: sql-${{ hashFiles('sql/') }}
           restore-keys: |
             sql-${{ hashFiles('sql/') }}
@@ -32,8 +32,6 @@ jobs:
       - name: Cache root
         id: cache-root
         uses: actions/cache@v3.3.2
-        env:
-          cache-name: cache-node-modules
         with:
           path: |
             .github/actions/setup/action.yaml
