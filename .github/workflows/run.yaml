@@ -20,20 +20,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache sql directory
+      - name: Restore cache sql directory
         id: cache-sql
-        uses: actions/cache@v3.3.2
+        uses: actions/cache/restore@v3.3.2
         with:
-          path: ~/sql
+          path: sql/
           key: sql-${{ hashFiles('sql/') }}
           restore-keys: |
             sql-${{ hashFiles('sql/') }}
 
-      - name: Cache root
+      - name: Restore cache root
         id: cache-root
-        uses: actions/cache@v3.3.2
-        env:
-          cache-name: cache-node-modules
+        uses: actions/cache/restore@v3.3.2
         with:
           path: |
             .github/actions/setup/action.yaml
@@ -88,3 +86,24 @@ jobs:
         run: echo "Run SQL"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Save cache sql directory
+        id: cache-sql
+        uses: actions/cache/save@v3.3.2
+        with:
+          path: sql/
+          key: sql-${{ hashFiles('sql/') }}
+          restore-keys: |
+            sql-${{ hashFiles('sql/') }}
+
+      - name: Save cache root
+        id: cache-root
+        uses: actions/cache/save@v3.3.2
+        with:
+          path: |
+            .github/actions/setup/action.yaml
+            .github/workflows/run.yaml
+            fuga.sql
+          key: root-${{ hashFiles('.github/workflows/run.yaml', '.github/actions/setup/action.yaml', 'fuga.sql') }}
+          restore-keys: |
+            root-${{ hashFiles('.github/workflows/run.yaml', '.github/actions/setup/action.yaml', 'fuga.sql') }}
