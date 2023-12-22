@@ -23,14 +23,8 @@ jobs:
       - name: Detect changes
         id: filter_changes
         run: |
-          git fetch origin main
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            DIFF_CMD="git diff --name-only origin/main...HEAD"
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            DIFF_CMD="git diff --name-only HEAD^ HEAD"
-          fi
-          CHANGES_IN_sql=$($DIFF_CMD -- 'sql/' | head -n 1)
-          CHANGES_IN_ROOT=$($DIFF_CMD -- '.github/workflows/run.yaml' '.github/actions/setup/action.yaml' 'fuga.sql' | head -n 1)
+          CHANGES_IN_sql=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- '^sql/')
+          CHANGES_IN_ROOT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- '.github/workflows/run.yaml' '.github/actions/setup/action.yaml' 'fuga.sql' | head -n 1)
           echo "changes_in_sql=$CHANGES_IN_sql" >> "$GITHUB_OUTPUT"
           echo "changes_in_root=$CHANGES_IN_ROOT" >> "$GITHUB_OUTPUT"
 
