@@ -49,6 +49,10 @@ jobs:
   plan:
     needs: check_for_changes
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory:
+          - sql
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4.1.1
@@ -57,6 +61,7 @@ jobs:
         id: setup
         uses: ./.github/actions/setup
         with:
+          directory: ${{ matrix.directory }}
           sql-cache-hit: ${{ needs.check_for_changes.outputs.sql-cache-hit }}
           root-cache-hit: ${{ needs.check_for_changes.outputs.root-cache-hit }}
 
@@ -78,6 +83,7 @@ jobs:
         id: setup
         uses: ./.github/actions/setup
         with:
+          directory: ${{ matrix.directory }}
           sql-cache-hit: ${{ needs.check_for_changes.outputs.sql-cache-hit }}
           root-cache-hit: ${{ needs.check_for_changes.outputs.root-cache-hit }}
 
