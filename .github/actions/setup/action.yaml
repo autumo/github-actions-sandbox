@@ -1,9 +1,9 @@
 NAME: Setup
 inputs:
-  changes_in_sql:
+  sql-cache-hit:
     description: Files with changes in the sql directory
     required: false
-  changes_in_root:
+  root-cache-hit:
     description: Files with changes in the root directory
     required: false
 runs:
@@ -12,8 +12,8 @@ runs:
     - name: Skip job if no changes detected
       id: check_skip_job
       if: |
-        (inputs.directory == 'sql' && inputs.changes_in_sql == '') &&
-        inputs.changes_in_root == ''
+        (inputs.directory == 'sql' && inputs.sql-cache-hit == 'true') &&
+        inputs.root_hash == 'true'
       shell: bash
       run: |
         echo "No changes in ${{ inputs.directory }} directory"

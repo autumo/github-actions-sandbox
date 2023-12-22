@@ -12,26 +12,41 @@ jobs:
   check_for_changes:
     runs-on: ubuntu-latest
     outputs:
-      changes_in_sql: ${{ steps.filter_changes.outputs.changes_in_sql }}
-      changes_in_root: ${{ steps.filter_changes.outputs.changes_in_root }}
+      sql-cache-hit: ${{ steps.cache-sql.outputs.cache-hit }}
+      root-cache-hit: ${{ steps.cache-sql.outputs.cache-root }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
+      - name: Cache sql directory
+        id: cache-sql
+        uses: actions/cache@v3.3.2
+        with:
+          path: ~/sql
+          key: sql-${{ hashFiles('sql/') }}
+          restore-keys: |
+            sql-${{ hashFiles('sql/') }}
+
+      - name: Cache root
+        id: cache-root
+        uses: actions/cache@v3.3.2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: |
+            .github/actions/setup/action.yaml
+            .github/workflows/run.yaml
+            fuga.sql
+          key: root-${{ hashFiles('.github/workflows/run.yaml', '.github/actions/setup/action.yaml', 'fuga.sql') }}
+          restore-keys: |
+            root-${{ hashFiles('.github/workflows/run.yaml', '.github/actions/setup/action.yaml', 'fuga.sql') }}
+
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-
-      - name: Detect changes
-        id: filter_changes
-        run: |
-          CHANGES_IN_sql=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- '^sql/')
-          CHANGES_IN_ROOT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- '.github/workflows/run.yaml' '.github/actions/setup/action.yaml' 'fuga.sql' | head -n 1)
-          echo "changes_in_sql=$CHANGES_IN_sql" >> "$GITHUB_OUTPUT"
-          echo "changes_in_root=$CHANGES_IN_ROOT" >> "$GITHUB_OUTPUT"
 
   plan:
     needs: check_for_changes
@@ -44,8 +59,8 @@ jobs:
         id: setup
         uses: ./.github/actions/setup
         with:
-          changes_in_sql: ${{ needs.check_for_changes.outputs.changes_in_sql }}
-          changes_in_root: ${{ needs.check_for_changes.outputs.changes_in_root }}
+          sql-cache-hit: ${{ needs.check_for_changes.outputs.sql-cache-hit }}
+          root-cache-hit: ${{ needs.check_for_changes.outputs.root-cache-hit }}
 
       - name: Plan
         if: steps.setup.outputs.skip != 'true'
@@ -65,8 +80,8 @@ jobs:
         id: setup
         uses: ./.github/actions/setup
         with:
-          changes_in_sql: ${{ needs.check_for_changes.outputs.changes_in_sql }}
-          changes_in_root: ${{ needs.check_for_changes.outputs.changes_in_root }}
+          sql-cache-hit: ${{ needs.check_for_changes.outputs.sql-cache-hit }}
+          root-cache-hit: ${{ needs.check_for_changes.outputs.root-cache-hit }}
 
       - name: Run
         if: steps.setup.outputs.skip != 'true'
