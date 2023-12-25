@@ -15,6 +15,10 @@ jobs:
       sql-cache-hit: ${{ steps.cache-sql.outputs.cache-hit }}
       root-cache-hit: ${{ steps.cache-sql.outputs.cache-root }}
     steps:
+
+      - name: echo vars
+        run: echo ${{ vars.HOGE }}
+
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
         with:
