@@ -14,6 +14,7 @@ runs:
 
     - name: echo vars
       run: echo ${{ vars.HOGE }}
+      shell: bash
 
     - name: Skip job if no changes detected
       id: check_skip_job
