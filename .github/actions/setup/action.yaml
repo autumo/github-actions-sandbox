@@ -11,6 +11,10 @@ inputs:
 runs:
   using: composite
   steps:
+
+    - name: echo vars
+      run: echo ${{ vars.HOGE }}
+
     - name: Skip job if no changes detected
       id: check_skip_job
       if: |
