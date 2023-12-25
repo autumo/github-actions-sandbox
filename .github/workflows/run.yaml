@@ -24,6 +24,10 @@ jobs:
         run: |
           echo "HOGE=${{ vars.HOGE }}" >> "$GITHUB_ENV"
 
+      - name: echo env
+        run: echo ${{ env.HOGE }}
+        shell: bash
+
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
         with:
