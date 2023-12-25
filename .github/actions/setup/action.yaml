@@ -12,8 +12,8 @@ runs:
   using: composite
   steps:
 
-    - name: echo vars
-      run: echo ${{ vars.HOGE }}
+    - name: echo env
+      run: echo ${{ env.HOGE }}
       shell: bash
 
     - name: Skip job if no changes detected

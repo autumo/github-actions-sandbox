@@ -19,6 +19,11 @@ jobs:
       - name: echo vars
         run: echo ${{ vars.HOGE }}
 
+      - name: add vars to env
+        shell: bash
+        run: |
+          echo "HOGE=${{ vars.HOGE }}" >> "$GITHUB_ENV"
+
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
         with:
@@ -58,6 +63,12 @@ jobs:
         directory:
           - sql
     steps:
+
+      - name: echo vars and env
+        run: |
+          echo ${{ vars.HOGE }}
+          echo ${{ env.HOGE }}
+
       - name: Checkout the repository
         uses: actions/checkout@v4.1.1
 
