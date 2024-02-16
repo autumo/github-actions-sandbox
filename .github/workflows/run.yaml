@@ -91,7 +91,7 @@ jobs:
           echo "${{github.ref}}"
           echo "${GITHUB_REF#refs/heads/}"
           echo "${{github.head_ref}}"
-          if [[ ${{github.head_ref}} =~ (cache/)+ ]]; then
+          if [[ ${{github.head_ref}} =~ (cache)+ ]]; then
             OPTION="-detailed-exitcode"
           fi
           
