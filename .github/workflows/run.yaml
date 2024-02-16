@@ -88,7 +88,8 @@ jobs:
         if: steps.setup.outputs.skip != 'true'
         run: | 
           echo "SQL Plan"
-          echo "${{github.ref_name}}"
+          echo "${{github.ref}}"
+          echo "${GITHUB_REF#refs/heads/}"
 
   apply:
     if: github.ref == 'refs/heads/main'
