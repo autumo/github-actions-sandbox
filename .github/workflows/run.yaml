@@ -86,12 +86,14 @@ jobs:
 
       - name: Plan
         if: steps.setup.outputs.skip != 'true'
+        env:
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: | 
           echo "SQL Plan"
           echo "${{github.ref}}"
           echo "${GITHUB_REF#refs/heads/}"
           echo "${{github.head_ref}}"
-          if [[ ${{github.head_ref}} =~ (cache)+ ]]; then
+          if [[ $GITHUB_HEAD_REF =~ (cache)+ ]]; then
             OPTION="-detailed-exitcode"
           fi
           
