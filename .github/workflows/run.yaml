@@ -90,6 +90,7 @@ jobs:
           echo "SQL Plan"
           echo "${{github.ref}}"
           echo "${GITHUB_REF#refs/heads/}"
+          echo "${{github.head_ref}}"
 
   apply:
     if: github.ref == 'refs/heads/main'
