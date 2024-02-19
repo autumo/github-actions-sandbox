@@ -37,8 +37,8 @@ jobs:
         id: cache-sql-file
         uses: actions/cache/restore@v4.0.0
         with:
-          path: "*.sql"
-          key: sql-${{ hashFiles('*.sql') }}
+          path: '**/*.sql'
+          key: sql-${{ hashFiles('**/*.sql') }}
           restore-keys: |
             sql-${{ hashFiles('*.sql') }}
 
@@ -152,5 +152,5 @@ jobs:
         id: cache-sql-file
         uses: actions/cache/restore@v4.0.0
         with:
-          path: "*.sql"
-          key: sql-${{ hashFiles('*.sql') }}
+          path: '**/*.sql'
+          key: sql-${{ hashFiles('**/*.sql') }}
