@@ -15,14 +15,36 @@ jobs:
       sql-cache-hit: ${{ steps.cache-sql.outputs.cache-hit }}
       root-cache-hit: ${{ steps.cache-sql.outputs.cache-root }}
     steps:
+
+      - name: echo vars
+        run: echo ${{ vars.HOGE }}
+
+      - name: add vars to env
+        shell: bash
+        run: |
+          echo "HOGE=${{ vars.HOGE }}" >> "$GITHUB_ENV"
+
+      - name: echo env
+        run: echo ${{ env.HOGE }}
+        shell: bash
+
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
+      - name: Restore cache sql file
+        id: cache-sql-file
+        uses: actions/cache/restore@v4.0.0
+        with:
+          path: "*.sql"
+          key: sql-${{ hashFiles('*.sql') }}
+          restore-keys: |
+            sql-${{ hashFiles('*.sql') }}
+
       - name: Restore cache sql directory
         id: cache-sql
-        uses: actions/cache/restore@v3.3.2
+        uses: actions/cache/restore@v4.0.0
         with:
           path: sql/
           key: sql-${{ hashFiles('sql/') }}
@@ -31,7 +53,7 @@ jobs:
 
       - name: Restore cache root
         id: cache-root
-        uses: actions/cache/restore@v3.3.2
+        uses: actions/cache/restore@v4.0.0
         with:
           path: |
             .github/actions/setup/action.yaml
@@ -54,6 +76,12 @@ jobs:
         directory:
           - sql
     steps:
+
+      - name: echo vars and env
+        run: |
+          echo ${{ vars.HOGE }}
+          echo ${{ env.HOGE }}
+
       - name: Checkout the repository
         uses: actions/checkout@v4.1.1
 
@@ -67,8 +95,18 @@ jobs:
 
       - name: Plan
         if: steps.setup.outputs.skip != 'true'
-        run: echo "SQL Plan"
-
+        env:
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+        run: | 
+          echo "SQL Plan"
+          echo "${{github.ref}}"
+          echo "${GITHUB_REF#refs/heads/}"
+          echo "${{github.head_ref}}"
+          if [[ $GITHUB_HEAD_REF =~ (cache)+ ]]; then
+            OPTION="-detailed-exitcode"
+          fi
+          
+          echo "terraform plan $OPTION"
   apply:
     if: github.ref == 'refs/heads/main'
     needs:
@@ -77,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.0.0
 
       - name: Setup
         id: setup
@@ -95,12 +133,10 @@ jobs:
 
       - name: Save cache sql directory
         id: cache-sql
-        uses: actions/cache/save@v3.3.2
+        uses: actions/cache/save@v4.0.0
         with:
           path: sql/
           key: sql-${{ hashFiles('sql/') }}
-          restore-keys: |
-            sql-${{ hashFiles('sql/') }}
 
       - name: Save cache root
         id: cache-root
@@ -111,5 +147,10 @@ jobs:
             .github/workflows/run.yaml
             fuga.sql
           key: root-${{ hashFiles('.github/workflows/run.yaml', '.github/actions/setup/action.yaml', 'fuga.sql') }}
-          restore-keys: |
-            root-${{ hashFiles('.github/workflows/run.yaml', '.github/actions/setup/action.yaml', 'fuga.sql') }}
+
+      - name: Save cache sql file
+        id: cache-sql-file
+        uses: actions/cache/restore@v4.0.0
+        with:
+          path: "*.sql"
+          key: sql-${{ hashFiles('*.sql') }}
