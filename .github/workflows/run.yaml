@@ -113,6 +113,7 @@ jobs:
             environment: staging
           - directory: manualsql
             environment: production
+    environment: ${{ matrix.environment }}
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4.0.0
