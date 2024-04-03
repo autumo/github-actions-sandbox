@@ -28,9 +28,10 @@ jobs:
         shell: bash
 
       - name: Checkout repository
-        uses: actions/checkout@v4.1.1
+        uses: autumo/github-actions-util-workflow/.github/actions/checkout@main
         with:
-          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+          repository: ${{ github.repository }}
 
       - name: Restore cache sql file
         id: cache-sql-file
@@ -76,7 +77,10 @@ jobs:
           - sql
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v4.1.1
+        uses: autumo/github-actions-util-workflow/.github/actions/checkout@main
+        with:
+          ref: ${{ github.head_ref }}
+          repository: ${{ github.repository }}
 
       - name: Setup
         id: setup
@@ -116,7 +120,10 @@ jobs:
     environment: ${{ matrix.environment }}
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v4.0.0
+        uses: autumo/github-actions-util-workflow/.github/actions/checkout@main
+        with:
+          ref: ${{ github.head_ref }}
+          repository: ${{ github.repository }}
 
       - name: Setup
         id: setup
